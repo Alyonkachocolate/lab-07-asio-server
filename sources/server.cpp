@@ -6,7 +6,7 @@ using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using std::chrono::system_clock;
 
-[[maybe_unused]] io_service service;
+static io_service service;
 
 // user defined class
 class talk_to_client {
@@ -33,7 +33,6 @@ class talk_to_client {
 std::vector<boost::shared_ptr<talk_to_client>> clients;
 [[maybe_unused]] boost::recursive_mutex mut;
 
-// for client
 void accept_thread() {
   tcp::acceptor acceptor(service, tcp::endpoint(tcp::v4(), 8001));
   while (true) {
@@ -54,8 +53,7 @@ void accept_thread() {
       new_->set_username(username);
       clients.push_back(new_);
       new_->answer_to_client("Login OK");
-      BOOST_LOG_TRIVIAL(info)
-          << "\nLogging ok\nUsername: " << username << "\n";
+      BOOST_LOG_TRIVIAL(info) << "\nLogging ok\nUsername: " << username << "\n";
     }
   }
 }
@@ -66,7 +64,6 @@ std::string get_users() {
   return users;
 }
 
-// for service
 void handle_clients_thread() {
   while (true) {
     boost::this_thread::sleep(boost::posix_time::millisec(1));
@@ -74,11 +71,15 @@ void handle_clients_thread() {
     for (auto& client : clients) {
       std::string command;
       client->socket().read_some(boost::asio::buffer(command, 1024));
-      if (command == "client_list_chaned")
-        client->answer_to_client(get_users());
-      client->answer_to_client("ping_OK");
+      if (command == "Clients") client->answer_to_client(get_users());
+      if (command == "Ping") {
+        if (clients.at(clients.size()) == client)
+          client->answer_to_client("Ping OK");
+        else
+          client->answer_to_client(get_users());
+      }
       BOOST_LOG_TRIVIAL(info)
-        << "\nAnswered to client. Username: " << client->username() << "\n";
+          << "\nAnswered to client. Username: " << client->username() << "\n";
     }
     clients.erase(std::remove_if(clients.begin(), clients.end(),
                                  boost::bind(&talk_to_client::timed_out, _1)),
