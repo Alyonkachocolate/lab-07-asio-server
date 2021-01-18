@@ -101,8 +101,8 @@ add_library(server_lib STATIC
 add_executable(tests
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
         )
-add_executable(server_exe
-        ${CMAKE_CURRENT_SOURCE_DIR}/sources/server.cpp
+add_executable(demo
+        ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
         )
 
 target_include_directories(server_lib
@@ -111,13 +111,13 @@ target_include_directories(server_lib
 target_include_directories(tests
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
         )
-target_include_directories(server_exe
+target_include_directories(demo
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
         )
 
 target_link_libraries(tests GTest::gtest_main server_lib)
 target_link_libraries(server_lib Boost::log Boost::thread Boost::system)
-target_link_libraries(server_exe server_lib Boost::log Boost::thread Boost::system)
+target_link_libraries(demo server_lib Boost::log Boost::thread Boost::system)
 
 enable_testing()
 add_test(NAME unit_tests COMMAND tests)
