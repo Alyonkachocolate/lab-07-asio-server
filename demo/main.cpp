@@ -1,5 +1,4 @@
-#include <header.hpp>
+// Copyright [2020] <Alyona Dorodnyaya>
 
-int main() {
+#include <server.hpp>
 
-}
